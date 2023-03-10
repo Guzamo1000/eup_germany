@@ -25,14 +25,15 @@ class noun:
         # mongodb+srv://nguyenconghau:258000@cluster0.kmhzq5p.mongodb.net/?retryWrites=true&w=majority
         self.client = pymongo.MongoClient(url_connect_mongo)
         self.db=self.client['fazzta']
-        self.collection=self.db['noun']
+        self.collection=self.db['noun2']
         self.remaining=self.noun
 # hàm crawl
     def crawl(self,noun):
         print(f"noun: {noun}")
         key=[noun]
-        self.remaining=self.remaining-set(key)
+        
         try:
+            self.remaining=self.remaining-set(key)
             request={}
             url="https://www.qmez.de:8444/v1/scanner/es/s?w="+str(noun)
             response=requests.get(url)
@@ -53,6 +54,7 @@ class noun:
             query=self.collection.insert_one(request)
             print(f"******success commit comlete {query}")
         except:
+            print(f"request {noun} failed")
             with open("request.txt", "w",encoding="utf-8") as f:
                 for k in self.remaining:
                     f.write(k+"\n")
@@ -72,7 +74,10 @@ class noun:
 
         for t in thread:
             t.join()
-
+            
+        with open("request.txt", "w",encoding="utf-8") as f:
+                for k in self.remaining:
+                    f.write(k+"\n")
 gender=noun(user='root', password='258000',host='localhost',database='fazzta', url_connect_mongo="mongodb+srv://nguyenconghau:258000@cluster0.kmhzq5p.mongodb.net/?retryWrites=true&w=majority")
 # gender.crawl("Geologennew")
 gender.threading()
