@@ -6,6 +6,7 @@ import time
 import threading
 import os
 import json
+import spacy
 class noun:
     def __init__(self,user, password, host, database, url_connect_mongo):
         #connect mysql
@@ -27,8 +28,19 @@ class noun:
         self.db=self.client['fazzta']
         self.collection=self.db['noun2']
         self.remaining=self.noun
+    def identify_nouns(self,noun):
+        nlp = spacy.load("de_core_news_sm")
+    
+        doc = nlp(noun)
+
+        for token in doc:
+            if "NOUN" in token.pos_:
+                if "Number=Plur" in token.morph:
+                    return "plural"
+                else:
+                    return "singular"
 # hàm crawl
-    def crawl(self,noun):
+    def crawl_gender(self,noun):
         print(f"noun: {noun}")
         key=[noun]
         
@@ -61,14 +73,15 @@ class noun:
         # print()
         # self.genders_ls.append(js_gender)
         time.sleep(3)
-        
+    def main(self):
+        pass
     def threading(self):
         thread=[]
         o=0
         for n in self.noun:
             print(o)
             o+=1
-            t=threading.Thread(target=self.crawl,args=(n,))
+            t=threading.Thread(target=self.crawl_gender,args=(n,))
             thread.append(t)
             t.start()
 
